@@ -119,8 +119,6 @@ in staged-recipes is to add the GTK3 stack (built in dependency order):
   (WebKit itself aborts with EGL_BAD_PARAMETER on GPU-less Xvfb; unrelated to the tray.)
 
 ## TODO before PR
-- Verify the real launchpad libdbusmenu 16.04.0 tarball (pre-generated configure) builds;
-  needs launchpadlibrarian.net reachable (blocked in the cloud session).
 - File an issue/PR on webkit2gtk4.1-feedstock: move ruby/perl/gperf/unifdef from host to
   build (or ignore_run_exports) so it stops pinning libffi <3.6; then drop `glib <2.90`.
 - Delete this notes file.
@@ -132,4 +130,7 @@ in staged-recipes is to add the GTK3 stack (built in dependency order):
   indicator 0.9.5 and appindicator 0.6.0.
 - With those, ido 0.10.4, indicator 0.9.5 and appindicator 0.6.0 build + pass tests, and the
   Tauri tray test passes again (SNI registered, dbusmenu exports "Quit").
-- Only libdbusmenu is still built from the Ubuntu 16.04.1+16.04.20160927 snapshot.
+- With full network access, the libdbusmenu recipe builds unmodified from the real launchpad
+  16.04.0 tarball (sha256 matches). All 5 outputs from real upstream sources build + pass tests,
+  and the Tauri tray test passes on them. GitHub archive URLs stay blocked in the cloud session
+  (separate per-repo git proxy); the git-archive tarballs are byte-identical, so that is fine.
