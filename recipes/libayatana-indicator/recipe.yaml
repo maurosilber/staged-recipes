@@ -1,0 +1,59 @@
+context:
+  version: "0.9.5"
+
+package:
+  name: libayatana-indicator
+  version: ${{ version }}
+
+source:
+  url: https://github.com/AyatanaIndicators/libayatana-indicator/archive/${{ version }}.tar.gz
+  sha256: 73d71c908b803f12e4a5ecd8392511b58afbdd0c82ad7909611a17bb7847c5c8
+
+build:
+  number: 0
+  skip: not linux
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+    - cmake
+    - ninja
+    - pkg-config
+    # glib-mkenums / glib-genmarshal
+    - glib-tools
+  host:
+    - glib
+    - gtk3
+    - libayatana-ido
+  run_exports:
+    # SOVERSION 7 (ABI_VERSION in CMakeLists.txt)
+    - ${{ pin_subpackage('libayatana-indicator', upper_bound='x.x') }}
+
+tests:
+  - package_contents:
+      include:
+        - libayatana-indicator3-0.4/libayatana-indicator/indicator-object.h
+      lib:
+        - ayatana-indicator3
+      files:
+        - lib/pkgconfig/ayatana-indicator3-0.4.pc
+  - script:
+      - pkg-config --exists --print-errors ayatana-indicator3-0.4
+    requirements:
+      run:
+        - pkg-config
+
+about:
+  homepage: https://github.com/AyatanaIndicators/libayatana-indicator
+  summary: Ayatana Indicators shared library (GTK3)
+  description: |
+    libayatana-indicator provides the shared code used by Ayatana indicator
+    renderers and by libayatana-appindicator.
+  license: GPL-3.0-only
+  license_file: COPYING
+  repository: https://github.com/AyatanaIndicators/libayatana-indicator
+
+extra:
+  recipe-maintainers:
+    - maurosilber
