@@ -36,6 +36,22 @@
   ayatana-ido 0.10.4 needs glib, gtk3.
   dbusmenu-gtk3 comes from Canonical's libdbusmenu (16.04.0, autotools).
 
+## Plan / milestone 1 (recipes written)
+Because Tauri needs `libayatana-appindicator3.so.1` with the GTK3 API, the fix
+in staged-recipes is to add the GTK3 stack (built in dependency order):
+1. `recipes/libdbusmenu` -> outputs `libdbusmenu-glib`, `libdbusmenu-gtk3` (16.04.0, autotools;
+   launchpad URL is under the `16.04` series, not `16.10`).
+2. `recipes/ayatana-ido` -> `libayatana-ido` 0.10.4 (CMake; GIR + Vala are REQUIRED upstream).
+3. `recipes/libayatana-indicator` -> 0.9.5 (CMake, ENABLE_IDO=ON, ENABLE_LOADER=OFF).
+4. `recipes/libayatana-appindicator` -> 0.6.0 (CMake, GTK3, mono/gtk-doc off, vala on).
+
+## Linux build environment on macOS
+- `container system kernel set --recommended` hung; fixed by downloading
+  kata-static-3.32.0-arm64.tar.zst manually, decompressing, and
+  `container system kernel set --tar kata.tar --binary opt/kata/share/kata-containers/vmlinux-6.18.35-197`.
+- `container run --platform linux/amd64 ubuntu:24.04` works (x86_64 via Rosetta).
+- Builds: rattler-build inside container, `-m conda-forge-pinning conda_build_config.yaml -m .ci_support/linux64.yaml -c conda-forge`.
+
 ## Finding 3: webkit2gtk4.1-feedstock recipe
 - recipe/recipe.yaml (v1), 2.48.5 build 4, host has gtk3, glib, gobject-introspection,
   libsoup etc. run_exports pins webkit2gtk4.1 exact.
