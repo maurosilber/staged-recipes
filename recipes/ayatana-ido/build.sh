@@ -5,6 +5,10 @@ set -euxo pipefail
 # g-ir-scanner and gi-docgen look up GIR dependencies through XDG_DATA_DIRS.
 export XDG_DATA_DIRS="${PREFIX}/share:${BUILD_PREFIX}/share:${XDG_DATA_DIRS:-/usr/share}"
 
+# C++ is only used by the (disabled) gtest-based tests; drop it from project()
+# so that a C++ compiler is not required.
+sed -i 's/^project(ayatana-ido C CXX)/project(ayatana-ido C)/' CMakeLists.txt
+
 # Upstream forces CMAKE_INSTALL_PREFIX to /usr when left at the default, and
 # GNUInstallDirs would pick lib64 on RHEL-like build images, so pin both.
 cmake -S . -B build -GNinja \
