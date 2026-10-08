@@ -29,9 +29,12 @@ requirements:
     - vala
     # gio-2.0.pc lists zlib in Requires.private, so pkg-config needs it present.
     - zlib
+    # fontconfig.pc (pulled in by gtk+-3.0.pc) requires expat.pc
+    - expat
   ignore_run_exports:
     from_package:
       - zlib
+      - expat
   run_exports:
     - ${{ pin_subpackage('libayatana-ido', upper_bound='x.x') }}
 

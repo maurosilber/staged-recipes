@@ -81,9 +81,12 @@ outputs:
         - vala
         - ${{ pin_subpackage('libdbusmenu-glib', exact=True) }}
         - zlib
+        # fontconfig.pc (pulled in by gtk+-3.0.pc) requires expat.pc
+        - expat
       ignore_run_exports:
         from_package:
           - zlib
+          - expat
       run:
         - ${{ pin_subpackage('libdbusmenu-glib', exact=True) }}
       run_exports:

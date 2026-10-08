@@ -28,9 +28,12 @@ requirements:
     - libayatana-ido
     # gio-2.0.pc lists zlib in Requires.private, so pkg-config needs it present.
     - zlib
+    # fontconfig.pc (pulled in by gtk+-3.0.pc) requires expat.pc
+    - expat
   ignore_run_exports:
     from_package:
       - zlib
+      - expat
   run_exports:
     # SOVERSION 7 (ABI_VERSION in CMakeLists.txt)
     - ${{ pin_subpackage('libayatana-indicator', upper_bound='x.x') }}
