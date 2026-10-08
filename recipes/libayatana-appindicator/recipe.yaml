@@ -1,0 +1,78 @@
+context:
+  version: "0.6.0"
+
+package:
+  name: libayatana-appindicator
+  version: ${{ version }}
+
+source:
+  url: https://github.com/AyatanaIndicators/libayatana-appindicator/archive/${{ version }}.tar.gz
+  sha256: 23be92ad8eb9625ce93b23b14f82f3cf88a4970c31d48581945ddfbac0441d06
+
+build:
+  number: 0
+  skip: not linux
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+    - cmake
+    - ninja
+    - pkg-config
+    # glib-mkenums / glib-genmarshal
+    - glib-tools
+    - gobject-introspection
+    - vala
+  host:
+    - glib
+    - gtk3
+    - gobject-introspection
+    - vala
+    - libayatana-ido
+    - libayatana-indicator
+    - libdbusmenu-glib
+    - libdbusmenu-gtk3
+  run_exports:
+    # SOVERSION 1: libayatana-appindicator3.so.1
+    - ${{ pin_subpackage('libayatana-appindicator', upper_bound='x.x') }}
+
+tests:
+  - package_contents:
+      include:
+        - libayatana-appindicator3-0.1/libayatana-appindicator/app-indicator.h
+      lib:
+        - ayatana-appindicator3
+      files:
+        # The exact soname that Tauri / tray-icon (libappindicator-sys) dlopen()s.
+        - lib/libayatana-appindicator3.so.1
+        - lib/pkgconfig/ayatana-appindicator3-0.1.pc
+        - lib/girepository-1.0/AyatanaAppIndicator3-0.1.typelib
+        - share/gir-1.0/AyatanaAppIndicator3-0.1.gir
+        - share/vala/vapi/ayatana-appindicator3-0.1.vapi
+  - script:
+      - pkg-config --exists --print-errors ayatana-appindicator3-0.1
+      # Make sure the library and all its dependencies resolve at runtime.
+      - python -c "import ctypes, os; ctypes.CDLL(os.path.join(os.environ['PREFIX'], 'lib', 'libayatana-appindicator3.so.1'))"
+    requirements:
+      run:
+        - pkg-config
+        - python
+
+about:
+  homepage: https://github.com/AyatanaIndicators/libayatana-appindicator
+  summary: Ayatana Application Indicators shared library (GTK3)
+  description: |
+    libayatana-appindicator allows applications to export a menu into an
+    indicator/tray area of a desktop shell using the StatusNotifierItem
+    protocol. This is the GTK3 flavour (libayatana-appindicator3.so.1) that
+    Tauri, tray-icon and other GtkMenu-based consumers dlopen().
+  license: GPL-3.0-only AND (LGPL-2.1-only OR LGPL-3.0-only)
+  license_file:
+    - COPYING.GPL.3
+    - COPYING.LGPL.2.1
+  repository: https://github.com/AyatanaIndicators/libayatana-appindicator
+
+extra:
+  recipe-maintainers:
+    - maurosilber
