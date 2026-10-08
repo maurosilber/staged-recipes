@@ -1,0 +1,66 @@
+context:
+  version: "0.10.4"
+
+package:
+  name: libayatana-ido
+  version: ${{ version }}
+
+source:
+  url: https://github.com/AyatanaIndicators/ayatana-ido/archive/${{ version }}.tar.gz
+  sha256: bd59abd5f1314e411d0d55ce3643e91cef633271f58126be529de5fb71c5ab38
+
+build:
+  number: 0
+  skip: not linux
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+    - cmake
+    - ninja
+    - pkg-config
+    - gobject-introspection
+    - vala
+  host:
+    - glib
+    - gtk3
+    - gobject-introspection
+    - vala
+  run_exports:
+    - ${{ pin_subpackage('libayatana-ido', upper_bound='x.x') }}
+
+tests:
+  - package_contents:
+      include:
+        - libayatana-ido3-0.4/libayatana-ido/libayatana-ido.h
+      lib:
+        - ayatana-ido3-0.4
+      files:
+        - lib/pkgconfig/libayatana-ido3-0.4.pc
+        - lib/girepository-1.0/AyatanaIdo3-0.4.typelib
+        - share/gir-1.0/AyatanaIdo3-0.4.gir
+        - share/vala/vapi/libayatana-ido3-0.4.vapi
+  - script:
+      - pkg-config --exists --print-errors libayatana-ido3-0.4
+    requirements:
+      run:
+        - pkg-config
+
+about:
+  homepage: https://github.com/AyatanaIndicators/ayatana-ido
+  summary: Ayatana Indicator Display Objects (GTK3 menu item widgets)
+  description: |
+    Ayatana IDO provides custom GTK3 menu widgets used by Ayatana indicators
+    and libayatana-indicator.
+  # Most sources are "GPL-3 or LGPL-2.1 or LGPL-3"; a few files are GPL-3 only (debian/copyright).
+  license: GPL-3.0-only AND (LGPL-2.1-only OR LGPL-3.0-only)
+  license_file:
+    - COPYING.GPL-3
+    - COPYING.LGPL-2.1
+    - COPYING.LGPL-3
+  repository: https://github.com/AyatanaIndicators/ayatana-ido
+
+extra:
+  recipe-maintainers:
+    - maurosilber
