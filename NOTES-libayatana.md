@@ -100,3 +100,27 @@ in staged-recipes is to add the GTK3 stack (built in dependency order):
 - Workaround in our recipes: `glib <2.90` in host (comment explains it).
 - Proper fix: webkit2gtk4.1-feedstock should move ruby/perl/gperf/unifdef to `build`
   (they are build-time tools) or add them to `ignore_run_exports.from_package`.
+
+## Milestone 3: end-to-end Tauri tray test PASSES (linux-64, session 2)
+- With `glib <2.90` in host, all 5 outputs build against libglib 2.88.3 and a pixi env
+  solves with webkit2gtk4.1 2.48.5_4 + libayatana-appindicator + libglib 2.88.3 + libffi 3.5.2.
+- Minimal Tauri 2 app (`tauri = { version = "2", features = ["tray-icon"] }`,
+  TrayIconBuilder + Menu with a "Quit" item) built with conda-forge `rust` + `c-compiler`.
+  pixi deps: rust, c-compiler, pkg-config, zlib, expat, webkit2gtk4.1, gtk3, libsoup,
+  librsvg, xorg-xorgproto, libayatana-appindicator; `[system-requirements] libc = "2.34"`.
+  NOTE: Tauri users also need `zlib` + `expat` in the env, or gdk-sys/gio pkg-config fails.
+- The binary gets RPATH=$CONDA_PREFIX/lib from conda-forge rust, so tray-icon's
+  dlopen("libayatana-appindicator3.so.1") resolves without LD_LIBRARY_PATH.
+- Under Xvfb + dbus-run-session with a minimal StatusNotifierWatcher (python/Gio):
+  item registered as /org/ayatana/NotificationItem/tray_icon_tray_app_main,
+  Status=Active, and com.canonical.dbusmenu GetLayout returns the "Quit" item.
+  /proc/PID/maps shows libayatana-appindicator3, -indicator3, -ido3, libdbusmenu-glib/-gtk3
+  and libwebkit2gtk-4.1 all from the pixi env.
+  (WebKit itself aborts with EGL_BAD_PARAMETER on GPU-less Xvfb; unrelated to the tray.)
+
+## TODO before PR
+- Verify the real upstream tarballs (indicator 0.9.5, appindicator 0.6.0, launchpad
+  libdbusmenu 16.04.0 with its pre-generated configure) on a machine/CI that can reach them.
+- File an issue/PR on webkit2gtk4.1-feedstock: move ruby/perl/gperf/unifdef from host to
+  build (or ignore_run_exports) so it stops pinning libffi <3.6; then drop `glib <2.90`.
+- Delete this notes file.
