@@ -26,6 +26,8 @@ outputs:
         - pkg-config
         - intltool
         - gnuconfig
+        # xsltproc generates dbus-menu-clean.xml in libdbusmenu-glib
+        - libxslt
         - gobject-introspection
         - vala
       host:
@@ -67,6 +69,8 @@ outputs:
         - pkg-config
         - intltool
         - gnuconfig
+        # xsltproc generates dbus-menu-clean.xml in libdbusmenu-glib
+        - libxslt
         - gobject-introspection
         - vala
       host:

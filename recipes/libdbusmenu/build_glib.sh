@@ -10,6 +10,11 @@ export CFLAGS="${CFLAGS} -Wno-error"
 # The release tarball ships an old config.guess/config.sub.
 cp "${BUILD_PREFIX}"/share/gnuconfig/config.* . || true
 
+# configure.ac only defines the HAVE_VALGRIND conditional inside the tests block,
+# so --disable-tests fails with "conditional HAVE_VALGRIND was never defined".
+export HAVE_VALGRIND_TRUE='#'
+export HAVE_VALGRIND_FALSE=''
+
 ./configure \
     --prefix="${PREFIX}" \
     --libdir="${PREFIX}/lib" \
