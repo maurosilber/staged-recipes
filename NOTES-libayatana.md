@@ -52,6 +52,23 @@ in staged-recipes is to add the GTK3 stack (built in dependency order):
 - `container run --platform linux/amd64 ubuntu:24.04` works (x86_64 via Rosetta).
 - Builds: rattler-build inside container, `-m conda-forge-pinning conda_build_config.yaml -m .ci_support/linux64.yaml -c conda-forge`.
 
+## Build fixes found so far (milestone 2)
+- gio-2.0.pc -> zlib, fontconfig.pc (via gtk+-3.0.pc) -> expat: pkg-config fails
+  ("Package 'zlib', required by 'gio-2.0', not found", "Package 'expat', required by
+  'fontconfig', not found") unless `zlib` and `expat` are in host. Added with ignore_run_exports.
+- ayatana-ido: `project(ayatana-ido C CXX)` needs a C++ compiler only for tests -> sed to `C`.
+- libdbusmenu: `--disable-tests` -> "conditional HAVE_VALGRIND was never defined";
+  fixed by exporting HAVE_VALGRIND_TRUE='#' HAVE_VALGRIND_FALSE=''. Needs xsltproc (libxslt).
+- Variant files: rattler-build 0.76 only honors `# [linux]` selectors in a file
+  named conda_build_config.yaml; `channel_sources` must be removed when passing `-c`.
+
+## Finding 4: webkit2gtk4.1 needs glibc >= 2.34 on the user's system
+- `pixi install` with default system-requirements fails:
+  "webkit2gtk4.1 2.48.4 | 2.48.5 would require __glibc >=2.34,<3.0.a0, for which no candidates were found."
+- Cause: feedstock recipe/conda_build_config.yaml sets `c_stdlib_version: 2.34`.
+  Users need `[system-requirements] libc = "2.34"` in pixi (or a glibc>=2.34 host).
+  Not a conflict with our recipes (built against 2.17, which is compatible).
+
 ## Finding 3: webkit2gtk4.1-feedstock recipe
 - recipe/recipe.yaml (v1), 2.48.5 build 4, host has gtk3, glib, gobject-introspection,
   libsoup etc. run_exports pins webkit2gtk4.1 exact.
