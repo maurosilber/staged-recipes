@@ -69,6 +69,13 @@ in staged-recipes is to add the GTK3 stack (built in dependency order):
   Users need `[system-requirements] libc = "2.34"` in pixi (or a glibc>=2.34 host).
   Not a conflict with our recipes (built against 2.17, which is compatible).
 
+## Status log
+- libayatana-appindicator-glib (original recipe): builds on linux-64 (container) ->
+  libayatana-appindicator-glib-2.0.3-h423ffd8_0.conda.
+- ~06:20-07:35: GTK3 builds were blocked ~75 min on "Blocking waiting for global file lock
+  on package cache" because a concurrent `pixi install` (Tauri env) held the rattler cache
+  lock. Don't run pixi install and rattler-build at the same time in one container.
+
 ## Finding 3: webkit2gtk4.1-feedstock recipe
 - recipe/recipe.yaml (v1), 2.48.5 build 4, host has gtk3, glib, gobject-introspection,
   libsoup etc. run_exports pins webkit2gtk4.1 exact.
