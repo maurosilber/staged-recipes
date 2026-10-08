@@ -14,6 +14,23 @@ cp "${BUILD_PREFIX}"/share/gnuconfig/config.* . || true
 export HAVE_VALGRIND_TRUE='#'
 export HAVE_VALGRIND_FALSE=''
 
+# vala 0.56's vapigen rejects the <doc:format/> element that gobject-introspection
+# >=1.80 writes into .gir files ("unknown child element `doc:format'"), so strip it
+# from the installed .gir files and, through a vapigen wrapper, from the freshly
+# generated ones before vapigen reads them. It only records the doc comment syntax.
+sed -i '/<doc:format /d' "${PREFIX}"/share/gir-1.0/*.gir "${BUILD_PREFIX}"/share/gir-1.0/*.gir
+cat > "${SRC_DIR}/vapigen-wrapper" <<'EOF_WRAPPER'
+#!/bin/bash
+for arg in "$@"; do
+    case "${arg}" in
+        *.gir) [ -f "${arg}" ] && sed -i '/<doc:format /d' "${arg}" ;;
+    esac
+done
+exec vapigen "$@"
+EOF_WRAPPER
+chmod +x "${SRC_DIR}/vapigen-wrapper"
+export VALA_API_GEN="${SRC_DIR}/vapigen-wrapper"
+
 ./configure \
     --prefix="${PREFIX}" \
     --libdir="${PREFIX}/lib" \

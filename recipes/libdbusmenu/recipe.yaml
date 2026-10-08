@@ -56,6 +56,8 @@ outputs:
         requirements:
           run:
             - pkg-config
+            # gio-2.0.pc requires zlib.pc
+            - zlib
 
   - package:
       name: libdbusmenu-gtk3
@@ -106,6 +108,9 @@ outputs:
         requirements:
           run:
             - pkg-config
+            # gio-2.0.pc and fontconfig.pc (via gtk+-3.0.pc) need these .pc files
+            - zlib
+            - expat
 
 about:
   homepage: https://launchpad.net/libdbusmenu
