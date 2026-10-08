@@ -1,0 +1,109 @@
+context:
+  version: "16.04.0"
+
+recipe:
+  name: libdbusmenu-split
+  version: ${{ version }}
+
+source:
+  url: https://launchpad.net/libdbusmenu/16.04/${{ version }}/+download/libdbusmenu-${{ version }}.tar.gz
+  sha256: b9cc4a2acd74509435892823607d966d424bd9ad5d0b00938f27240a1bfa878a
+
+build:
+  number: 0
+  skip: not linux
+
+outputs:
+  - package:
+      name: libdbusmenu-glib
+    build:
+      script: build_glib.sh
+    requirements:
+      build:
+        - ${{ compiler('c') }}
+        - ${{ stdlib('c') }}
+        - make
+        - pkg-config
+        - intltool
+        - gnuconfig
+        - gobject-introspection
+        - vala
+      host:
+        - glib
+        - gobject-introspection
+        - vala
+      run_exports:
+        - ${{ pin_subpackage('libdbusmenu-glib', upper_bound='x') }}
+    tests:
+      - package_contents:
+          include:
+            - libdbusmenu-glib-0.4/libdbusmenu-glib/server.h
+          lib:
+            - dbusmenu-glib
+          files:
+            - lib/pkgconfig/dbusmenu-glib-0.4.pc
+            - lib/girepository-1.0/Dbusmenu-0.4.typelib
+            - share/gir-1.0/Dbusmenu-0.4.gir
+      - script:
+          - pkg-config --exists --print-errors dbusmenu-glib-0.4
+        requirements:
+          run:
+            - pkg-config
+
+  - package:
+      name: libdbusmenu-gtk3
+    build:
+      script: build_gtk3.sh
+    requirements:
+      build:
+        - ${{ compiler('c') }}
+        - ${{ stdlib('c') }}
+        - make
+        - pkg-config
+        - intltool
+        - gnuconfig
+        - gobject-introspection
+        - vala
+      host:
+        - glib
+        - gtk3
+        - atk
+        - gobject-introspection
+        - vala
+        - ${{ pin_subpackage('libdbusmenu-glib', exact=True) }}
+      run:
+        - ${{ pin_subpackage('libdbusmenu-glib', exact=True) }}
+      run_exports:
+        - ${{ pin_subpackage('libdbusmenu-gtk3', upper_bound='x') }}
+    tests:
+      - package_contents:
+          include:
+            - libdbusmenu-gtk3-0.4/libdbusmenu-gtk/menu.h
+          lib:
+            - dbusmenu-gtk3
+          files:
+            - lib/pkgconfig/dbusmenu-gtk3-0.4.pc
+            - lib/girepository-1.0/DbusmenuGtk3-0.4.typelib
+            - share/gir-1.0/DbusmenuGtk3-0.4.gir
+      - script:
+          - pkg-config --exists --print-errors dbusmenu-gtk3-0.4
+        requirements:
+          run:
+            - pkg-config
+
+about:
+  homepage: https://launchpad.net/libdbusmenu
+  summary: Library for passing menus over DBus (com.canonical.dbusmenu)
+  description: |
+    libdbusmenu passes a menu structure across DBus so that a program can
+    create a menu and another program can render it. libdbusmenu-glib holds
+    the toolkit-independent part and libdbusmenu-gtk3 the GTK3 helpers.
+  license: LGPL-2.1-only OR LGPL-3.0-only
+  license_file:
+    - COPYING.2.1
+    - COPYING
+  repository: https://code.launchpad.net/libdbusmenu
+
+extra:
+  recipe-maintainers:
+    - maurosilber
