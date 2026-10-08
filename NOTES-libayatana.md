@@ -79,3 +79,24 @@ in staged-recipes is to add the GTK3 stack (built in dependency order):
 ## Finding 3: webkit2gtk4.1-feedstock recipe
 - recipe/recipe.yaml (v1), 2.48.5 build 4, host has gtk3, glib, gobject-introspection,
   libsoup etc. run_exports pins webkit2gtk4.1 exact.
+
+## Session 2 (linux-64 cloud container, native)
+- Sources from github.com archives and launchpadlibrarian.net are blocked by that
+  environment's egress policy, so local builds used Ubuntu archive orig tarballs
+  (ido 0.10.4; indicator 0.9.4; appindicator 0.5.94; libdbusmenu
+  16.04.1+16.04.20160927 = 16.04.0 + packaging, autoreconf'd with a gtk-doc stub)
+  via scratch copies of the recipes. Recipes themselves keep the upstream URLs.
+- vala 0.56.17 (latest on conda-forge) chokes on `<doc:format/>` in .gir files
+  (gobject-introspection >=1.80). Now stripped in ayatana-ido, libayatana-appindicator
+  (build gir target first, strip, then continue) and libdbusmenu (VALA_API_GEN wrapper).
+- Test envs need zlib + expat for pkg-config (gio-2.0.pc / fontconfig.pc).
+- With those fixes all 5 outputs build and pass their tests on linux-64.
+
+## Finding 5: webkit2gtk4.1 cannot coexist with libglib >=2.90 (root cause)
+- Packages built against current glib (2.90) run-export `libglib >=2.90` -> `libffi 3.7`.
+- webkit2gtk4.1 2.48.5_4 has `ruby` (and perl/gperf/unifdef) in `host` without
+  ignore_run_exports, so it depends at runtime on `ruby >=4.0.5,<4.1` -> `libffi <3.6`.
+  => unsolvable with libglib 2.90. webkit2gtk4.1 alone resolves libglib 2.88.3.
+- Workaround in our recipes: `glib <2.90` in host (comment explains it).
+- Proper fix: webkit2gtk4.1-feedstock should move ruby/perl/gperf/unifdef to `build`
+  (they are build-time tools) or add them to `ignore_run_exports.from_package`.

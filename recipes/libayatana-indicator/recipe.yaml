@@ -23,7 +23,10 @@ requirements:
     # glib-mkenums / glib-genmarshal
     - glib-tools
   host:
-    - glib
+    # webkit2gtk4.1 (<=2.48.5_4) leaks ruby's run_export (libffi <3.6), which makes it
+    # uninstallable next to libglib >=2.90 (libffi 3.7). Build against an older glib so
+    # that our libglib run_export stays compatible with it, e.g. for Tauri apps.
+    - glib <2.90
     - gtk3
     - libayatana-ido
     # gio-2.0.pc lists zlib in Requires.private, so pkg-config needs it present.
